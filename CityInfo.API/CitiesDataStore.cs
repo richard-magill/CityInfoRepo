@@ -5,7 +5,6 @@ namespace CityInfo.API
     public class CitiesDataStore
     {
         public List<CityDto> Cities {get; set;}
-        public static CitiesDataStore Current { get; } = new CitiesDataStore();
         public CitiesDataStore() => Cities = new List<CityDto>
                 {
                     new CityDto
@@ -69,8 +68,9 @@ namespace CityInfo.API
         }
         
         public CityDto AddCity(CityForCreationDto cityForCreationDto)
+           
         {
-            var cityId = CitiesDataStore.Current.Cities.Max(x => x.Id);
+            var cityId = Cities.Max(x => x.Id);
             var city = new CityDto()
             {
                 Id = ++cityId,
