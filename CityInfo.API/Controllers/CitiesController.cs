@@ -1,5 +1,8 @@
-﻿using CityInfo.API.Models;
+﻿using AutoMapper;
+using CityInfo.API.Models;
+using CityInfo.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 
 namespace CityInfo.API.Controllers
@@ -8,30 +11,28 @@ namespace CityInfo.API.Controllers
     [Route("api/cities")]
     public class CitiesController : ControllerBase
     {
-        private readonly CitiesDataStore _dataStore;
-        public CitiesController(CitiesDataStore dataStore)
+        private readonly ICityInfoRepository _cityInfoRepository;
+        private readonly IMapper _mapper;
+        public CitiesController(ICityInfoRepository cityInfoRepository, IMapper mapper)
         {
-            _dataStore = dataStore;
+            _cityInfoRepository = cityInfoRepository;
+            _mapper = mapper;
         }
     
         [HttpGet]
-        public ActionResult<IEnumerable<CityDto>> GetCities()
+        public async Task<ActionResult<IAsyncEnumerable<CityDto>>> GetCities()
         {
-            return _dataStore.Cities;
+            var result = await _cityInfoRepository.GetCitiesAsync();
+            return Ok(_mapper.Map<IEnumerable<CityDto>>(result));  
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<CityDto> GetCity(int id)
+        [HttpGet("{cityId}")]
+        public async Task<IActionResult> GetCity(int cityId, bool includePointsOfInterest = true)
         {
-            var result = _dataStore.GetCity(id);
-            return (result != null) ? Ok(result) : NotFound();
+            var result = await _cityInfoRepository.GetCityAsync(cityId, includePointsOfInterest);
+            return (result != null) ? Ok(_mapper.Map<CityDto>(result)) : NotFound();
         }
 
-        [HttpPost]
-        public ActionResult<CityDto> CreateCity([FromBody] CityForCreationDto dto)
-        {
-            var city = _dataStore.AddCity(dto);
-            return Ok(city);
-        }
+
     }
 }
