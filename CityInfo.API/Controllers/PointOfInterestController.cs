@@ -136,6 +136,7 @@ namespace CityInfo.API.Controllers
             }
 
             _cityInfoRepository.DeletePointOfInterest(pointOfInterestEntity);
+            await _cityInfoRepository.SaveChangesAsync();
 
             _mailService.Send("Deleted POI", $"PointOfInterest was deleted: {pointOfInterestEntity.Name}");
             return NoContent();
